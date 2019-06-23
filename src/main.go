@@ -30,6 +30,7 @@ func main() {
 
 	router.HandleFunc("/books", getBooks).Methods("GET")
 	router.HandleFunc("/books/{id}", getBook).Methods("GET")
+	router.HandleFunc("/books", addBook).Methods("POST")
 
 	log.Fatal(http.ListenAndServe(":8001", router))
 }
@@ -49,4 +50,20 @@ func getBook(w http.ResponseWriter, r *http.Request) {
 			json.NewEncoder(w).Encode(book)
 		}
 	}
+}
+
+func addBook(w http.ResponseWriter, r *http.Request) {
+	// func NewDecoder returns a pointer to a Decoder that reads from r.Body
+	decoder := json.NewDecoder(r.Body)
+	// func (*Decoder) Decode reads JSON encoded values from its input and stores it in v
+	var book Book
+	err := decoder.Decode(&book)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	books = append(books, book)
+
+	json.NewEncoder(w).Encode(books)
 }
