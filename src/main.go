@@ -31,6 +31,7 @@ func main() {
 	router.HandleFunc("/books", getBooks).Methods("GET")
 	router.HandleFunc("/books/{id}", getBook).Methods("GET")
 	router.HandleFunc("/books", addBook).Methods("POST")
+	router.HandleFunc("/books/{id}", updateBook).Methods("PUT")
 
 	log.Fatal(http.ListenAndServe(":8001", router))
 }
@@ -66,4 +67,36 @@ func addBook(w http.ResponseWriter, r *http.Request) {
 	books = append(books, book)
 
 	json.NewEncoder(w).Encode(books)
+}
+
+func updateBook(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	id, _ := strconv.Atoi(params["id"])
+
+	decoder := json.NewDecoder(r.Body)
+	var newBook Book
+	err := decoder.Decode(&newBook)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	i := index(books, id)
+
+	if i == -1 {
+		log.Fatal("Book not found")
+	}
+
+	books[i] = newBook
+
+	json.NewEncoder(w).Encode(books)
+}
+
+func index(vb []Book, id int) int {
+	for i, book := range vb {
+		if book.ID == id {
+			return i
+		}
+	}
+	return -1
 }
