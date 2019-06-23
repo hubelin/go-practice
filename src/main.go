@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
 )
@@ -26,7 +27,9 @@ func main() {
 		Book{ID: 3, Title: "Go3", Author: "Mr.Golang", Year: "2030"},
 		Book{ID: 4, Title: "Go4", Author: "Mr.Golang", Year: "2040"},
 	)
+
 	router.HandleFunc("/books", getBooks).Methods("GET")
+	router.HandleFunc("/books/{id}", getBook).Methods("GET")
 
 	log.Fatal(http.ListenAndServe(":8001", router))
 }
@@ -35,4 +38,15 @@ func getBooks(w http.ResponseWriter, r *http.Request) {
 	// func NewEncoder returns a pointer to a new enconder that writes to w
 	// func (*Encoder) Encode writes the JSON encoding of books to the stream
 	json.NewEncoder(w).Encode(books)
+}
+
+func getBook(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	id, _ := strconv.Atoi(params["id"])
+
+	for _, book := range books {
+		if book.ID == id {
+			json.NewEncoder(w).Encode(book)
+		}
+	}
 }
